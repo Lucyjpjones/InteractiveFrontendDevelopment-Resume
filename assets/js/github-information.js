@@ -1,3 +1,4 @@
+// Returning user 'object' from gitHub, avatar character, numbers of followers, number following and public repo count
 function userInformationHTML(user) {
     return `
         <h2>${user.name}
@@ -14,7 +15,7 @@ function userInformationHTML(user) {
             <p>Followers: ${user.followers} - Following ${user.following} <br> Repos: ${user.public_repos}</p>
         </div>`;
 }
-
+// Repo list
 function repoInformationHTML(repos) {
     if (repos.length == 0) {
         return `<div class="clearfix repo-list">No repos!</div>`;
@@ -35,22 +36,25 @@ function repoInformationHTML(repos) {
                 </ul>
             </div>`;
 }
-
+// Ensures no empty divs
 function fetchGitHubInformation(event) {
     $("#gh-user-data").html("");
     $("#gh-repo-data").html("");
 
+    // Entering username response
     var username = $("#gh-username").val();
     if (!username) {
         $("#gh-user-data").html(`<h2>Please enter a GitHub username</h2>`);
         return;
     }
-
+    
+    // Entering username response
     $("#gh-user-data").html(
         `<div id="loader">
             <img src="assets/css/loader.gif" alt="loading..." />
         </div>`);
 
+    // Promise
     $.when(
         $.getJSON(`https://api.github.com/users/${username}`),
         $.getJSON(`https://api.github.com/users/${username}/repos`)
@@ -61,10 +65,12 @@ function fetchGitHubInformation(event) {
             $("#gh-user-data").html(userInformationHTML(userData));
             $("#gh-repo-data").html(repoInformationHTML(repoData));
         },
+        // Error messages if user not found
         function(errorResponse) {
             if (errorResponse.status === 404) {
                 $("#gh-user-data").html(
                     `<h2>No info found for user ${username}</h2>`);
+            // Access denied error 403 linked to too many requests in time period- setting nicer user response
             } else if (errorResponse.status === 403) {
                 var resetTime = new Date(errorResponse.getResponseHeader('X-RateLimit-Reset') * 1000);
                 $("#gh-user-data").html(`<h4>Too many requests, please wait until ${resetTime.toLocaleTimeString()}</h4>`);
